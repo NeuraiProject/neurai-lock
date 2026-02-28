@@ -1,0 +1,54 @@
+{
+  "name": "@neuraiproject/neurai-lock",
+  "version": "0.1.0",
+  "description": "Gated access for Neurai web apps: verify wallet ownership and on-chain balance from a Node.js backend",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "import": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "require": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "client"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neuraiproject/neurai-lock.git"
+  },
+  "keywords": [
+    "Neurai",
+    "XNA",
+    "wallet",
+    "authentication",
+    "blockchain"
+  ],
+  "author": "Neuraiproject",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/neuraiproject/neurai-lock/issues"
+  },
+  "homepage": "https://github.com/neuraiproject/neurai-lock#readme",
+  "dependencies": {
+    "@neuraiproject/neurai-message": "^0.7.1",
+    "@neuraiproject/neurai-rpc": "^0.4.6"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.130",
+    "tsup": "^8.4.0",
+    "typescript": "^5.5.3"
+  }
+}

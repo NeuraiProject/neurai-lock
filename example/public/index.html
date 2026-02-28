@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neurai Lock — Example</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 36px;
+      width: 100%;
+      max-width: 520px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .logo svg { width: 36px; height: 36px; }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #f0f6fc;
+    }
+
+    .subtitle {
+      font-size: 0.875rem;
+      color: #8b949e;
+      margin-top: 4px;
+    }
+
+    #connectBtn {
+      width: 100%;
+      margin-top: 28px;
+      padding: 13px 20px;
+      background: #238636;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    #connectBtn:hover:not(:disabled) { background: #2ea043; }
+    #connectBtn:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
+
+    #status {
+      margin-top: 16px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      display: none;
+    }
+
+    #status.info  { background: #1c2a3a; color: #79c0ff; border: 1px solid #1f6feb; }
+    #status.error { background: #2d1a1e; color: #ff7b72; border: 1px solid #6e2c31; }
+
+    #wallet {
+      display: none;
+      margin-top: 24px;
+    }
+
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #8b949e;
+      margin-bottom: 10px;
+    }
+
+    .address-box {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-family: monospace;
+      font-size: 0.875rem;
+      word-break: break-all;
+      color: #79c0ff;
+      margin-bottom: 20px;
+    }
+
+    .balance-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .balance-cell {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .balance-label {
+      font-size: 0.75rem;
+      color: #8b949e;
+      margin-bottom: 4px;
+    }
+
+    .balance-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #3fb950;
+    }
+
+    .balance-unit {
+      font-size: 0.75rem;
+      color: #8b949e;
+      margin-left: 4px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    th {
+      text-align: left;
+      padding: 8px 12px;
+      color: #8b949e;
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border-bottom: 1px solid #30363d;
+    }
+
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #21262d;
+      color: #e6edf3;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .asset-name { font-family: monospace; color: #d2a8ff; }
+    .asset-amount { font-weight: 600; color: #3fb950; }
+
+    .empty-assets {
+      padding: 20px;
+      text-align: center;
+      color: #484f58;
+      font-size: 0.875rem;
+    }
+
+    .disconnect-btn {
+      margin-top: 20px;
+      padding: 8px 16px;
+      background: transparent;
+      color: #8b949e;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .disconnect-btn:hover { color: #ff7b72; border-color: #6e2c31; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">
+      <img src="/icon128.png" width="36" height="36" alt="Neurai" style="border-radius:8px;">
+      <div>
+        <h1>Neurai Lock</h1>
+        <p class="subtitle">Digital signature authentication</p>
+      </div>
+    </div>
+
+    <div id="noExtension" style="display:none; padding:12px 16px; background:#2d1a1e; color:#ff7b72; border:1px solid #6e2c31; border-radius:8px; font-size:0.875rem;">
+      Neurai Wallet extension is not installed. Please install it to continue.
+    </div>
+
+    <button id="connectBtn">Connect Neurai Wallet</button>
+    <div id="status"></div>
+
+    <div id="wallet">
+      <div class="section-title">Address</div>
+      <div class="address-box" id="walletAddress"></div>
+
+      <div class="section-title">XNA Balance</div>
+      <div class="balance-grid">
+        <div class="balance-cell">
+          <div class="balance-label">Total confirmed</div>
+          <div class="balance-value" id="xnaTotal">—<span class="balance-unit">XNA</span></div>
+        </div>
+        <div class="balance-cell">
+          <div class="balance-label">No age filter</div>
+          <div class="balance-value" id="xnaAged" style="color:#8b949e">—<span class="balance-unit">XNA</span></div>
+        </div>
+      </div>
+
+      <div class="section-title">Assets</div>
+      <div id="assetsContainer">
+        <table>
+          <thead>
+            <tr>
+              <th>Asset</th>
+              <th style="text-align:right">Amount</th>
+            </tr>
+          </thead>
+          <tbody id="assetsBody"></tbody>
+        </table>
+      </div>
+
+      <button class="disconnect-btn" id="disconnectBtn">Disconnect</button>
+    </div>
+  </div>
+
+  <script src="/neurai-lock-client.js"></script>
+  <script>
+    const connectBtn    = document.getElementById('connectBtn');
+    const statusEl      = document.getElementById('status');
+    const walletSection = document.getElementById('wallet');
+    const noExtEl       = document.getElementById('noExtension');
+
+    function showStatus(msg, type) {
+      statusEl.textContent = msg;
+      statusEl.className = type;
+      statusEl.style.display = 'block';
+    }
+
+    function hideStatus() {
+      statusEl.style.display = 'none';
+    }
+
+    function formatXna(value) {
+      return Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 8 });
+    }
+
+    function formatAmount(value) {
+      const n = Number(value);
+      return Number.isInteger(n) ? n.toLocaleString('en-US') : n.toLocaleString('en-US', { maximumFractionDigits: 8 });
+    }
+
+    function renderWallet(result) {
+      document.getElementById('walletAddress').textContent = result.address;
+
+      const xnaTotal = result.balances.xna.total;
+      const xnaAged  = result.balances.xna.aged;
+
+      document.getElementById('xnaTotal').innerHTML =
+        `${formatXna(xnaTotal)}<span class="balance-unit">XNA</span>`;
+
+      // aged == total means no minAge was configured — show "—" for the second cell
+      const agedEl = document.getElementById('xnaAged');
+      if (xnaAged === xnaTotal) {
+        agedEl.innerHTML = `—<span class="balance-unit"></span>`;
+        agedEl.closest('.balance-cell').querySelector('.balance-label').textContent = 'No age filter';
+      } else {
+        agedEl.innerHTML = `${formatXna(xnaAged)}<span class="balance-unit">XNA</span>`;
+        agedEl.closest('.balance-cell').querySelector('.balance-label').textContent = 'Age-filtered balance';
+      }
+
+      const tbody = document.getElementById('assetsBody');
+      tbody.innerHTML = '';
+
+      const assets = result.balances.assets;
+      if (assets.length === 0) {
+        document.getElementById('assetsContainer').innerHTML =
+          '<div class="empty-assets">This address holds no assets</div>';
+      } else {
+        assets.forEach(asset => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="asset-name">${asset.name}</td>
+            <td style="text-align:right" class="asset-amount">${formatAmount(asset.amount)}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      walletSection.style.display = 'block';
+      connectBtn.style.display = 'none';
+    }
+
+    // Wait for the content script to inject window.neuraiWallet, then update UI
+    NeuraiLockClient.waitForWallet(3000).then(function(found) {
+      if (!found) {
+        noExtEl.style.display = 'block';
+        connectBtn.disabled = true;
+      }
+    });
+
+    connectBtn.addEventListener('click', async () => {
+      connectBtn.disabled = true;
+      showStatus('Waiting for approval in the extension popup...', 'info');
+
+      const result = await NeuraiLockClient.connect({
+        challengeUrl: '/api/challenge',
+        verifyUrl: '/api/verify',
+      });
+
+      if (result.ok) {
+        hideStatus();
+        renderWallet(result);
+      } else {
+        const msgs = {
+          NOT_INSTALLED:        'Neurai extension is not installed.',
+          NO_WALLET:            'No wallet configured in the extension.',
+          USER_REJECTED:        'Signature rejected. Please approve the request in the extension popup.',
+          CHALLENGE_ERROR:      'Failed to get challenge from server.',
+          VERIFY_REQUEST_ERROR: 'Failed to send verification to server.',
+        };
+        showStatus(msgs[result.errorCode] || result.reason || 'Unknown error.', 'error');
+        connectBtn.disabled = false;
+      }
+    });
+
+    document.getElementById('disconnectBtn').addEventListener('click', () => {
+      walletSection.style.display = 'none';
+      connectBtn.style.display = 'block';
+      connectBtn.disabled = !NeuraiLockClient.isWalletInstalled();
+      hideStatus();
+    });
+  </script>
+</body>
+</html>
