@@ -2,7 +2,6 @@
   "compilerOptions": {
     "target": "ES2017",
     "lib": ["ES2017"],
-    "types": ["node"],
     "module": "ESNext",
     "moduleResolution": "node",
     "strict": true,
