@@ -1,0 +1,9 @@
+services:
+  neurai-lock-example:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: neurai-lock-example
+    ports:
+      - "4500:4500"
+    restart: unless-stopped
